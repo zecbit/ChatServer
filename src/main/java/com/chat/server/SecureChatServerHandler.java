@@ -4,6 +4,7 @@ package com.chat.server;
  * Created by zec on 2016/9/22.
  */
 
+import com.chat.service.ALL_SERVICE;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -21,7 +22,7 @@ import java.net.InetAddress;
  */
 public class SecureChatServerHandler extends SimpleChannelInboundHandler<String> {
 
-    static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) {
@@ -62,10 +63,6 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<String>
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        for (Channel c: channels) {
-            if (c == ctx.channel()) {
-                c.writeAndFlush("Your message is too long\n");
-            }
-        }
+        ALL_SERVICE.EXCEPTION_HANDLER.exceptionCaught(ctx, cause);
     }
 }
