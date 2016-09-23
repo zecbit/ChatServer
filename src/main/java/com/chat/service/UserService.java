@@ -2,7 +2,6 @@ package com.chat.service;
 
 import com.chat.entity.UserFactory;
 import com.chat.entity.Users;
-import com.chat.service.BaseService;
 import io.netty.channel.Channel;
 
 import java.util.ArrayList;
@@ -12,7 +11,7 @@ import java.util.List;
 /**
  * Created by zec on 2016/9/23.
  */
-public class UserService extends BaseService {
+public class UserService{
 
     public static Users getUsersByChannelHashCode(Channel channel){
         Users user = null;

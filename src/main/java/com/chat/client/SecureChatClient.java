@@ -3,6 +3,7 @@ package com.chat.client;
 /**
  * Created by zec on 2016/9/22.
  */
+import com.chat.service.AllService;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -22,7 +23,6 @@ import java.io.InputStreamReader;
 public final class SecureChatClient {
 
     static final String HOST = System.getProperty("host", "127.0.0.1");
-    static final int PORT = Integer.parseInt(System.getProperty("port", "8992"));
 
     public static void main(String[] args) throws Exception {
         // Configure SSL.
@@ -37,7 +37,7 @@ public final class SecureChatClient {
                     .handler(new SecureChatClientInitializer(sslCtx));
 
             // Start the connection attempt.
-            Channel ch = b.connect(HOST, PORT).sync().channel();
+            Channel ch = b.connect(HOST, AllService.getConfigService().getServerPort()).sync().channel();
 
             // Read commands from the stdin.
             ChannelFuture lastWriteFuture = null;

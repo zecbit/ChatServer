@@ -3,6 +3,7 @@ package com.chat.client;
 /**
  * Created by zec on 2016/9/22.
  */
+import com.chat.service.AllService;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -28,7 +29,7 @@ public class SecureChatClientInitializer extends ChannelInitializer<SocketChanne
         ChannelPipeline pipeline = ch.pipeline();
 
         // Add SSL handler first to encrypt and decrypt everything.
-        pipeline.addLast(sslCtx.newHandler(ch.alloc(), SecureChatClient.HOST, SecureChatClient.PORT));
+        pipeline.addLast(sslCtx.newHandler(ch.alloc(), SecureChatClient.HOST, AllService.getConfigService().getServerPort()));
 
         // On top of the SSL handler, add the text line codec.
         pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));

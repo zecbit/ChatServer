@@ -3,6 +3,7 @@ package com.chat.server;
 /**
  * Created by zec on 2016/9/22.
  */
+import com.chat.service.AllService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -16,7 +17,6 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 public final class SecureChatServer {
 
-    static final int PORT = Integer.parseInt(System.getProperty("port", "8992"));
 
     public static void main(String[] args) throws Exception {
         SelfSignedCertificate ssc = new SelfSignedCertificate();
@@ -32,7 +32,7 @@ public final class SecureChatServer {
                     .handler(new LoggingHandler(LogLevel.INFO))
                     .childHandler(new SecureChatServerInitializer(sslCtx));
 
-            b.bind(PORT).sync().channel().closeFuture().sync();
+            b.bind(AllService.getConfigService().getServerPort()).sync().channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();

@@ -4,6 +4,7 @@ package com.chat.server;
  * Created by zec on 2016/9/22.
  */
 
+import com.chat.service.AllService;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -32,7 +33,7 @@ public class SecureChatServerInitializer extends ChannelInitializer<SocketChanne
         pipeline.addLast(sslCtx.newHandler(ch.alloc()));
 
         // On top of the SSL handler, add the text line codec.
-        pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));
+        pipeline.addLast(new DelimiterBasedFrameDecoder(AllService.getConfigService().getMaxTextLength(), Delimiters.lineDelimiter()));
         pipeline.addLast(new StringDecoder());
         pipeline.addLast(new StringEncoder());
 
