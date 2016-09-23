@@ -4,22 +4,20 @@ package com.chat.service;
  * Created by zec on 2016/9/23.
  */
 public class AllService {
-    private MessageHandler messageService;
-    private ExceptionHandler exceptionService;
+    private static final MessageHandler messageService = new MessageHandler();
+    private static final ExceptionHandler exceptionService = new ExceptionHandler();
+    private static final UserService userService = new UserService();
 
-    public MessageHandler getMessageService() {
+    public static UserService getUserService() {
+        return userService;
+    }
+
+    public  static MessageHandler getMessageService() {
         return messageService;
     }
 
-    public void setMessageService(MessageHandler messageService) {
-        this.messageService = messageService;
-    }
-
-    public ExceptionHandler getExceptionService() {
+    public  static ExceptionHandler getExceptionService() {
         return exceptionService;
     }
 
-    public void setExceptionService(ExceptionHandler exceptionService) {
-        this.exceptionService = exceptionService;
-    }
 }

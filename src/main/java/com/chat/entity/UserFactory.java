@@ -24,17 +24,6 @@ public class UserFactory {
         return users;
     }
 
-    public static Users getUsersByChannelHashCode(Channel channel){
-        Users user = null;
-        user = UserFactory.getUsers().get(channel.hashCode());
-        return user;
-    }
-
-    public static Users setUsersByChannelHashCode(Channel channel, Users user){
-        user = UserFactory.getUsers().put(channel.hashCode(), user);
-        return user;
-    }
-
     public synchronized static Set<String> getUserNames() {
         if(userNames == null){
             userNames = new HashSet<String>();
@@ -42,7 +31,4 @@ public class UserFactory {
         return userNames;
     }
 
-    public static void setUserNames(Set<String> userNames) {
-        UserFactory.userNames = userNames;
-    }
 }

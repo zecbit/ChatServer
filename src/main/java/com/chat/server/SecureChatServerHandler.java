@@ -22,8 +22,6 @@ import java.net.InetAddress;
  */
 public class SecureChatServerHandler extends SimpleChannelInboundHandler<String> {
 
-    private AllService allService;
-
     @Override
     public void channelActive(final ChannelHandlerContext ctx) {
         // Once session is secured, send a greeting and register the channel to the global channel
@@ -48,12 +46,12 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<String>
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
         // Send the received message to all channels but the current one.
-        allService.getMessageService().handle(ctx, msg);
+        AllService.getMessageService().handle(ctx, msg);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        allService.getExceptionService().exceptionCaught(ctx, cause);
+        AllService.getExceptionService().exceptionCaught(ctx, cause);
     }
 
 }

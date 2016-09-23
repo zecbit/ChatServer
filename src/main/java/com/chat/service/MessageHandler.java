@@ -1,10 +1,14 @@
 package com.chat.service;
 
 import com.chat.entity.ChannelGroupFactory;
+import com.chat.entity.RoomFactory;
 import com.chat.entity.UserFactory;
 import com.chat.entity.Users;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by zec on 2016/9/22.
@@ -25,14 +29,44 @@ public class MessageHandler{
             currentUserNameOfMsg = user.getUsername();
             currentRoomOfMsg = user.getCurrentRoom();
             if("/rooms".equals(msg)){
-                currentChannel.writeAndFlush("Rooms are : 111, 222, 333\n");
+                currentChannel.writeAndFlush("Active rooms are\n");
+                Set<String> rooms = RoomFactory.getRoomNames();
+                for(String eachRoomName : rooms){
+                    int userNumberOfRoom = AllService.getUserService().countUserNumbersByRoomName(eachRoomName);
+                    currentChannel.writeAndFlush("* "+eachRoomName+" ("+userNumberOfRoom+")\n");
+                }
+                currentChannel.writeAndFlush("end of list.\n");
                 return;
+            }
+            if(msg.contains("/create")){
+                String roomName = msg.substring(msg.indexOf(" ")+1);
+                RoomFactory.getRoomNames().add(roomName);
+                AllService.getUserService().setUsersByChannelHashCode(currentChannel, user);
+                return;
+            }
+            if(msg.contains("/leave")){
+                user.setCurrentRoom(null);
+                AllService.getUserService().setUsersByChannelHashCode(currentChannel, user);
             }
             if(msg.contains("/join")){
                 String roomName = msg.substring(msg.indexOf(" ")+1);
                 user.setCurrentRoom(roomName);
-                UserFactory.setUsersByChannelHashCode(currentChannel, user);
-                return;
+                currentRoomOfMsg = roomName;
+                AllService.getUserService().setUsersByChannelHashCode(currentChannel, user);
+
+                currentChannel.writeAndFlush("entering room: "+roomName+"\n");
+                List<String> userNames = AllService.getUserService().findUsersByRoomName(roomName);
+                for(String username : userNames){
+                    currentChannel.writeAndFlush("* "+username);
+                    if(username.equals(currentUserNameOfMsg)){
+                        currentChannel.writeAndFlush("(** this is you)\n");
+                    }
+                    else{
+                        currentChannel.writeAndFlush("\n");
+                    }
+                }
+                currentChannel.writeAndFlush("end of list.\n");
+                //return;
             }
         }
         else{
@@ -45,19 +79,29 @@ public class MessageHandler{
                 Users user = new Users();
                 user.setUsername(msg);
                 UserFactory.getUserNames().add(user.getUsername());
-                UserFactory.setUsersByChannelHashCode(currentChannel, user);
+                AllService.getUserService().setUsersByChannelHashCode(currentChannel, user);
                 currentChannel.writeAndFlush("Welcome " + user.getUsername() + "!\n");
             }
             return;
         }
 
-
         //broadcasting messages
         for (Channel c: ChannelGroupFactory.getChannels()) {
             if (c != ctx.channel()) {
                 //Same room
-                Users user = UserFactory.getUsersByChannelHashCode(c);
+                Users user = AllService.getUserService().getUsersByChannelHashCode(c);
                 if(user.getCurrentRoom().equals(currentRoomOfMsg)){
+
+                    if(msg.contains("/join")){
+                        c.writeAndFlush("* new user joined chat: "+currentUserNameOfMsg+ '\n');
+                        break;
+                    }
+
+                    if(msg.contains("/leave")){
+                        c.writeAndFlush("* user has left chat: "+currentUserNameOfMsg+ '\n');
+                        break;
+                    }
+
                     c.writeAndFlush("[" + currentUserNameOfMsg + "] " + msg + '\n');
                 }
             } else {
