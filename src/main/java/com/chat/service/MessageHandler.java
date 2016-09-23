@@ -1,0 +1,83 @@
+package com.chat.service;
+
+import com.chat.entity.ChannelGroupFactory;
+import com.chat.entity.UserFactory;
+import com.chat.entity.Users;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+
+/**
+ * Created by zec on 2016/9/22.
+ */
+public class MessageHandler{
+
+    public void handle(ChannelHandlerContext ctx, String msg) throws Exception{
+
+        //msg's speaker
+        //msg's room
+        String currentUserNameOfMsg = null;
+        String currentRoomOfMsg = null;
+        Channel currentChannel = ctx.channel();
+
+        //self command <-> interacting
+        if(UserFactory.getUsers().containsKey(ctx.channel().hashCode())){
+            Users user = UserFactory.getUsers().get(ctx.channel().hashCode());
+            currentUserNameOfMsg = user.getUsername();
+            currentRoomOfMsg = user.getCurrentRoom();
+            if("/rooms".equals(msg)){
+                currentChannel.writeAndFlush("Rooms are : 111, 222, 333\n");
+                return;
+            }
+            if(msg.contains("/join")){
+                String roomName = msg.substring(msg.indexOf(" ")+1);
+                user.setCurrentRoom(roomName);
+                UserFactory.setUsersByChannelHashCode(currentChannel, user);
+                return;
+            }
+        }
+        else{
+            //msg is user name;
+            if(UserFactory.getUserNames().contains(msg)){
+                currentChannel.writeAndFlush("Sorry, name taken.\n");
+                currentChannel.writeAndFlush("Login Name?\n");
+            }
+            else{
+                Users user = new Users();
+                user.setUsername(msg);
+                UserFactory.getUserNames().add(user.getUsername());
+                UserFactory.setUsersByChannelHashCode(currentChannel, user);
+                currentChannel.writeAndFlush("Welcome " + user.getUsername() + "!\n");
+            }
+            return;
+        }
+
+
+        //broadcasting messages
+        for (Channel c: ChannelGroupFactory.getChannels()) {
+            if (c != ctx.channel()) {
+                //Same room
+                Users user = UserFactory.getUsersByChannelHashCode(c);
+                if(user.getCurrentRoom().equals(currentRoomOfMsg)){
+                    c.writeAndFlush("[" + currentUserNameOfMsg + "] " + msg + '\n');
+                }
+            } else {
+                c.writeAndFlush("[you] " + msg + '\n');
+            }
+        }
+
+        // Close the connection if the client has sent 'bye'.
+        if ("bye".equals(msg.toLowerCase())) {
+            ctx.close();
+        }
+    }
+
+    public void sendMessageToSpecifiedClient(ChannelHandlerContext ctx, String message){
+        StringBuffer line = new StringBuffer(message).append("\n");
+        for (Channel c: ChannelGroupFactory.getChannels()) {
+            if (c == ctx.channel()) {
+                c.writeAndFlush(line.toString());
+            }
+        }
+    }
+
+}

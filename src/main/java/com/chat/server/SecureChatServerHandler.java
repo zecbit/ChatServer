@@ -4,16 +4,16 @@ package com.chat.server;
  * Created by zec on 2016/9/22.
  */
 
-import com.chat.service.ALL_SERVICE;
+import com.chat.entity.UserFactory;
+import com.chat.entity.Users;
+import com.chat.service.AllService;
+import com.chat.entity.ChannelGroupFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetAddress;
 
@@ -22,7 +22,7 @@ import java.net.InetAddress;
  */
 public class SecureChatServerHandler extends SimpleChannelInboundHandler<String> {
 
-    public static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private AllService allService;
 
     @Override
     public void channelActive(final ChannelHandlerContext ctx) {
@@ -38,8 +38,9 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<String>
                                 "Your session is protected by " +
                                         ctx.pipeline().get(SslHandler.class).engine().getSession().getCipherSuite() +
                                         " cipher suite.\n");
-
-                        channels.add(ctx.channel());
+                        ctx.writeAndFlush(
+                                "Login Name?\n");
+                        ChannelGroupFactory.getChannels().add(ctx.channel());
                     }
                 });
     }
@@ -47,22 +48,12 @@ public class SecureChatServerHandler extends SimpleChannelInboundHandler<String>
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
         // Send the received message to all channels but the current one.
-        for (Channel c: channels) {
-            if (c != ctx.channel()) {
-                c.writeAndFlush("[" + ctx.channel().remoteAddress() + "] " + msg + '\n');
-            } else {
-                c.writeAndFlush("[you] " + msg + '\n');
-            }
-        }
-
-        // Close the connection if the client has sent 'bye'.
-        if ("bye".equals(msg.toLowerCase())) {
-            ctx.close();
-        }
+        allService.getMessageService().handle(ctx, msg);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        ALL_SERVICE.EXCEPTION_HANDLER.exceptionCaught(ctx, cause);
+        allService.getExceptionService().exceptionCaught(ctx, cause);
     }
+
 }
