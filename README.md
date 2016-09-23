@@ -10,7 +10,7 @@ Feature
 * message can be configured in properties to support i18n
 
 Further improvement not implemented:
-1. Add Spring container implementation.
-2. Add Database capability to store user data
-3. Add NO-SQL capability such as cassandra to store message
-4. Frequent visit will be forbidden or blocked
+* Add Spring container implementation.
+* Add Database capability to store user data
+* Add NO-SQL capability such as cassandra to store message
+* Frequent visit will be forbidden or blocked
