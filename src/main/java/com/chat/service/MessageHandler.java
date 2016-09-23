@@ -8,6 +8,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -22,6 +23,17 @@ public class MessageHandler{
         String currentUserNameOfMsg = null;
         String currentRoomOfMsg = null;
         Channel currentChannel = ctx.channel();
+
+        if(msg == null || msg.trim().equals("")){
+            Random random = new Random();
+            int seed = random.nextInt(3);
+            switch(seed){
+                case 0:currentChannel.writeAndFlush("Please say something...\n");break;
+                case 1:currentChannel.writeAndFlush("You must be kidding.\n");break;
+                case 2:currentChannel.writeAndFlush("Aha! You are right here!\n");break;
+            }
+            return;
+        }
 
         //self command <-> interacting
         if(UserFactory.getUsers().containsKey(ctx.channel().hashCode())){
@@ -39,16 +51,34 @@ public class MessageHandler{
                 return;
             }
             if(msg.contains("/create")){
+
+                if(user.getCurrentRoom() != null){
+                    currentChannel.writeAndFlush("You are in the chat room. Please leave current room first. \n");
+                    return;
+                }
+
                 String roomName = msg.substring(msg.indexOf(" ")+1);
                 RoomFactory.getRoomNames().add(roomName);
                 AllService.getUserService().setUsersByChannelHashCode(currentChannel, user);
                 return;
             }
             if(msg.contains("/leave")){
+
+                if(user.getCurrentRoom() == null){
+                    currentChannel.writeAndFlush("You are NOT in the chat room. \n");
+                    return;
+                }
+
                 user.setCurrentRoom(null);
                 AllService.getUserService().setUsersByChannelHashCode(currentChannel, user);
             }
             if(msg.contains("/join")){
+
+                if(user.getCurrentRoom() != null){
+                    currentChannel.writeAndFlush("You are in the chat room. Please leave current room first. \n");
+                    return;
+                }
+
                 String roomName = msg.substring(msg.indexOf(" ")+1);
                 user.setCurrentRoom(roomName);
                 currentRoomOfMsg = roomName;
