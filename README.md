@@ -21,10 +21,6 @@ How to get:
 How to run the Server:
 * If you have IDE(such as IntelliJ), run/debug SecureChatServer class
 * If you have JDK(1.7 above), run maven, then run java -jar ChatServer-1.0-SNAPSHOT.jar
-* (Untested) docker support, first, build it, then run it.
-docker build -t docker.sample.cn:5000/ChatServer .
-docker run -d --name chatServer1 -p 9399:9399 docker.sample.cn:5000/ChatServer
-
 
 How to run the Client:
 * If you have IDE(such as IntelliJ), run/debug SecureChatClient class
@@ -32,3 +28,7 @@ How to run the Client:
 How to configure:
 * edit system parameter in config.properties within folder $ChatServer$/src/main/resources
 * edit message in messages.properties within folder $ChatServer$/src/main/resources
+
+(Untested) docker support:
+* first build it, docker build -t docker.sample.cn:5000/ChatServer .
+* then run it. docker run -d --name chatServer1 -p 9399:9399 docker.sample.cn:5000/ChatServer
