@@ -29,7 +29,7 @@ public class SecureChatClientInitializer extends ChannelInitializer<SocketChanne
         ChannelPipeline pipeline = ch.pipeline();
 
         // Add SSL handler first to encrypt and decrypt everything.
-        pipeline.addLast(sslCtx.newHandler(ch.alloc(), SecureChatClient.HOST, AllService.getConfigService().getServerPort()));
+        pipeline.addLast(sslCtx.newHandler(ch.alloc(), AllService.getConfigService().getServerHost(), AllService.getConfigService().getServerPort()));
 
         // On top of the SSL handler, add the text line codec.
         pipeline.addLast(new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()));

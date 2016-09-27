@@ -4,6 +4,7 @@ import com.chat.entity.ChannelGroupFactory;
 import com.chat.entity.RoomFactory;
 import com.chat.entity.UserFactory;
 import com.chat.entity.Users;
+import com.chat.util.ChatConstants;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -40,7 +41,7 @@ public class ChatService {
             Users user = UserFactory.getUsers().get(ctx.channel().hashCode());
             currentUserNameOfMsg = user.getUsername();
             currentRoomOfMsg = user.getCurrentRoom();
-            if("/help".equals(msg)){
+            if(ChatConstants.HELP.equals(msg)){
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("/help"));
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("/rooms"));
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("/create"));
@@ -49,7 +50,7 @@ public class ChatService {
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("/quit"));
                 return;
             }
-            if("/rooms".equals(msg)){
+            if(ChatConstants.ROOMS.equals(msg)){
 
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.activeRoom.title"));
                 Set<String> rooms = RoomFactory.getRoomNames();
@@ -60,7 +61,7 @@ public class ChatService {
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.activeRoom.endOfList"));
                 return;
             }
-            if(msg.contains("/create")){
+            if(msg.contains(ChatConstants.CREATE)){
 
                 if(user.getCurrentRoom() != null){
                     sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.cannot.dosth"));
@@ -73,7 +74,7 @@ public class ChatService {
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.room.created.success"));
                 return;
             }
-            if(msg.contains("/leave")){
+            if(msg.contains(ChatConstants.LEAVE)){
 
                 if(user.getCurrentRoom() == null){
                     sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.not.in.the.room"));
@@ -83,7 +84,7 @@ public class ChatService {
                 user.setCurrentRoom(null);
                 AllService.getUserService().setUsersByChannelHashCode(currentChannelOfMsg, user);
             }
-            if(msg.contains("/join")){
+            if(msg.contains(ChatConstants.JOIN)){
 
                 if(user.getCurrentRoom() != null){
                     sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.cannot.dosth"));
@@ -122,6 +123,7 @@ public class ChatService {
                 UserFactory.getUserNames().add(user.getUsername());
                 AllService.getUserService().setUsersByChannelHashCode(currentChannelOfMsg, user);
                 sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.welcome.title") + " "+user.getUsername() + "!");
+                sendMsg(currentChannelOfMsg, AllService.getMessageService().getText("chat.msg.help.title"));
             }
             return;
         }
@@ -133,12 +135,12 @@ public class ChatService {
                 Users user = AllService.getUserService().getUsersByChannelHashCode(c);
                 if(user.getCurrentRoom().equals(currentRoomOfMsg)){
 
-                    if(msg.contains("/join")){
+                    if(msg.contains(ChatConstants.JOIN)){
                         sendMsg(c, AllService.getMessageService().getText("chat.msg.new.user.join") + currentUserNameOfMsg);
                         break;
                     }
 
-                    if(msg.contains("/leave")){
+                    if(msg.contains(ChatConstants.LEAVE)){
                         sendMsg(c, AllService.getMessageService().getText("chat.msg.user.has.left") + currentUserNameOfMsg);
                         break;
                     }
@@ -151,7 +153,9 @@ public class ChatService {
         }
 
         // Close the connection if the client has sent 'bye'.
-        if ("/quit".equals(msg.toLowerCase())) {
+        if (ChatConstants.QUIT.equals(msg.toLowerCase())) {
+            UserFactory.getUsers().put(ctx.channel().hashCode(), null);
+            UserFactory.getUserNames().remove(currentUserNameOfMsg);
             ctx.close();
         }
     }

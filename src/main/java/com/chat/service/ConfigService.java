@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 public class ConfigService {
 
     static final int PORT = Integer.parseInt(System.getProperty("port", "9399"));
+    static final String HOST = System.getProperty("host", "114.115.200.173");
 
     private ResourceBundle bundle;
 
@@ -37,5 +38,17 @@ public class ConfigService {
             port = Integer.parseInt(configPort);
         }
         return port;
+    }
+
+    public String getServerHost(){
+        String configHost = AllService.getConfigService().getText("server.host");
+        String host = "127.0.0.1";
+        if(configHost == null){
+            host = HOST;
+        }
+        else{
+            host = configHost;
+        }
+        return host;
     }
 }

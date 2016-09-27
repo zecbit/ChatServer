@@ -22,7 +22,6 @@ import java.io.InputStreamReader;
  */
 public final class SecureChatClient {
 
-    static final String HOST = System.getProperty("host", "127.0.0.1");
 
     public static void main(String[] args) throws Exception {
         // Configure SSL.
@@ -37,7 +36,7 @@ public final class SecureChatClient {
                     .handler(new SecureChatClientInitializer(sslCtx));
 
             // Start the connection attempt.
-            Channel ch = b.connect(HOST, AllService.getConfigService().getServerPort()).sync().channel();
+            Channel ch = b.connect(AllService.getConfigService().getServerHost(), AllService.getConfigService().getServerPort()).sync().channel();
 
             // Read commands from the stdin.
             ChannelFuture lastWriteFuture = null;
